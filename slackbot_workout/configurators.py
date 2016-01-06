@@ -40,27 +40,18 @@ class ConfigurationProvider(object):
         except:
             return default
 
+    # Slack configuration
     def channel_name(self):
         return self.config['channel_name']
 
     def bot_name(self):
         return self.config['bot_name']
 
+    # Webserver configuration
     def webserver_port(self):
         return self.get_config_or_default(80, ['webserver_port'])
 
-    def office_hours_on(self):
-        return self.get_config_or_default(False, ['office_hours', 'on'])
-
-    def office_hours_begin(self):
-        return self.config['office_hours']['begin']
-
-    def office_hours_end(self):
-        return self.config['office_hours']['end']
-
-    def debug(self):
-        return self.get_config_or_default(False, ['debug'])
-
+    # Bot behavior
     def min_time_between_callouts(self):
         return self.get_config_or_default(17, ['callouts', 'time_between', 'min_time'])
 
@@ -76,9 +67,40 @@ class ConfigurationProvider(object):
     def exercises(self):
         return self.config['exercises']
 
+    # Max exercises per user per day
     def user_exercise_limit(self):
         return self.get_config_or_default(3, ['user_exercise_limit'])
 
+    # Database logging configuration
+    def dbname(self):
+        return self.get_config_or_default('flexecution', ['dbname'])
+
+    def workout_log_tablename(self):
+        return self.get_config_or_default('flexecution', ['workout_log', 'tablename'])
+
+    # Print extra debugging information, and short sleeps in places
+    def debug(self):
+        return self.get_config_or_default(False, ['debug'])
+
+    # Configurable options
+    # Office hours
+    def office_hours_on(self):
+        return self.get_config_or_default(False, ['office_hours', 'on'])
+
+    def office_hours_begin(self):
+        return self.config['office_hours']['begin']
+
+    def office_hours_end(self):
+        return self.config['office_hours']['end']
+
+    # Per-user settings configuration
+    def user_settings_enabled(self):
+        return self.get_config_or_default(False, ['user_settings', 'enable'])
+
+    def user_settings_tablename(self):
+        return self.get_config_or_default('user_settings', ['user_settings', 'tablename'])
+
+    # Enable acknowledgment
     def enable_acknowledgment(self):
         return self.get_config_or_default(False, ['enable_acknowledgment'])
 
