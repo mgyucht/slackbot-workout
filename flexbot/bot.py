@@ -1,8 +1,9 @@
+from __future__ import absolute_import
 import datetime
 import logging
 import random
 
-from util import NoEligibleUsersException
+from .util import NoEligibleUsersException
 
 # Configuration values to be set in setConfiguration
 class Bot(object):

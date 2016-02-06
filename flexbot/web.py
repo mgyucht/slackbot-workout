@@ -1,10 +1,11 @@
+from __future__ import absolute_import
 import cherrypy
 import logging
 import pystache
 import random
 
-from constants import Constants
-from util import StatementRenderer
+from .constants import Constants
+from .util import StatementRenderer
 
 class FlexbotWebServer(object):
     SUCCESS_STATEMENTS = [

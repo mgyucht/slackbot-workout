@@ -1,11 +1,12 @@
+from __future__ import absolute_import
 from abc import ABCMeta, abstractmethod
 import json
 import os
 import yaml
 
-from constants import Constants
-from exercise import from_dict
-from util import InvalidLoggerTypeException
+from .constants import Constants
+from .exercise import from_dict
+from .util import InvalidLoggerTypeException
 
 class ConfigurationProvider(object):
     __metaclass__ = ABCMeta

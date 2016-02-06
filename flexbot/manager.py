@@ -1,9 +1,10 @@
+from __future__ import absolute_import
 import json
 import logging
 
-from constants import Constants
-from user import User
-from util import NoEligibleUsersException
+from .constants import Constants
+from .user import User
+from .util import NoEligibleUsersException
 
 class UserManager(object):
     def __init__(self, api, configuration, workout_logger):
