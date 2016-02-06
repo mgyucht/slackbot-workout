@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from builtins import object
 from abc import ABCMeta, abstractmethod
 import json
 import os
@@ -7,10 +8,9 @@ import yaml
 from .constants import Constants
 from .exercise import from_dict
 from .util import InvalidLoggerTypeException
+from future.utils import with_metaclass
 
-class ConfigurationProvider(object):
-    __metaclass__ = ABCMeta
-
+class ConfigurationProvider(with_metaclass(ABCMeta, object)):
     @abstractmethod
     def load_configuration(self):
         pass

@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from builtins import object
 import cherrypy
 import logging
 import pystache
@@ -93,7 +94,7 @@ A little primer on how I work: after I call you out for an exercise, I will only
 
     def print_exercises(self):
         exercises_text = "The currently supported exercises are: "
-        exercises_text += ", ".join(map(lambda e: e.name, self.configuration.exercises()))
+        exercises_text += ", ".join([e.name for e in self.configuration.exercises()])
         return {'text': exercises_text}
 
     def print_exercise_info(self, exercise_name):
@@ -122,7 +123,7 @@ A little primer on how I work: after I call you out for an exercise, I will only
                 if username in user_reverse_lookup:
                     users_to_print.add(user_reverse_lookup[username])
                 elif username == "channel":
-                    users_to_print = self.user_manager.users.keys()
+                    users_to_print = list(self.user_manager.users.keys())
                     break
         if len(users_to_print) > 0:
             stats = self.user_manager.stats(list(users_to_print))

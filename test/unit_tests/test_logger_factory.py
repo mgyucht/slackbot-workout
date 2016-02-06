@@ -1,3 +1,4 @@
+from builtins import object
 import mock
 
 from flexbot.configurators import ConfigurationProvider

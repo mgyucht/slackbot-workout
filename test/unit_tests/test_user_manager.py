@@ -1,3 +1,4 @@
+from builtins import object
 import mock
 
 from flexbot.api import FlexbotApiClient

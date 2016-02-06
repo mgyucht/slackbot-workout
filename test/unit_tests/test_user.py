@@ -1,3 +1,4 @@
+from builtins import object
 from flexbot.user import User
 
 class TestUser(object):

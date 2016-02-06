@@ -1,4 +1,9 @@
 from __future__ import absolute_import
+from __future__ import division
+from builtins import str
+from builtins import range
+from builtins import object
+from past.utils import old_div
 import datetime
 import logging
 import random
@@ -53,11 +58,10 @@ class Bot(object):
         # How much time is there left in the day
         time_left = datetime.datetime.now().replace(hour=self.config.office_hours_end(), minute=0,
                 second=0, microsecond=0) - datetime.datetime.now()
-        self.logger.debug("time_left (min): %d", time_left.seconds / 60)
+        self.logger.debug("time_left (min): %d", old_div(time_left.seconds, 60))
 
         # How many exercises remain to be done
-        exercise_count = sum(map(lambda u: self.user_manager.total_exercises_for_user(u),
-            eligible_users))
+        exercise_count = sum([self.user_manager.total_exercises_for_user(u) for u in eligible_users])
         self.logger.debug("exercise_count: %d", exercise_count)
 
         max_exercises = self.config.user_exercise_limit() * len(eligible_users)
@@ -78,8 +82,8 @@ class Bot(object):
                     * (1 - self.config.group_callout_chance()))
         self.logger.debug("avg_people_per_callout: %d", avg_people_per_callout)
 
-        avg_minutes_per_exercise = time_left.seconds / float(remaining_exercises *
-                avg_people_per_callout * 60)
+        avg_minutes_per_exercise = old_div(time_left.seconds, float(remaining_exercises *
+                avg_people_per_callout * 60))
         self.logger.debug("avg_minutes_per_exercise: %d", avg_minutes_per_exercise)
 
         return min(self.config.max_time_between_callouts(),
@@ -135,8 +139,7 @@ class Bot(object):
         """
         Selects an active user from the list of online users to complete the provided exercise
         """
-        prime_users = filter(lambda u: not self.user_manager.user_has_done_exercise(u, exercise),
-                eligible_users)
+        prime_users = [u for u in eligible_users if not self.user_manager.user_has_done_exercise(u, exercise)]
         # If there are users which haven't done the current exercise, assign the exercise to one of
         # them. Otherwise, assign it to any user.
         if len(prime_users) > 0:

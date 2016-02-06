@@ -1,3 +1,4 @@
+from builtins import object
 import mock
 
 from flexbot.configurators import InMemoryConfigurationProvider
@@ -62,8 +63,7 @@ class TestWeb(object):
         ack_handler.acknowledge_winner.return_value = Constants.ACKNOWLEDGE_SUCCEEDED
         um.get_firstname.return_value = 'Real'
         result = server.flex(user_id='UREALUSER', text='testbot done')
-        assert len(filter(lambda u: result['text'] == StatementRenderer(u).render_statement('Real'),
-            server.SUCCESS_STATEMENTS)) == 1
+        assert len([u for u in server.SUCCESS_STATEMENTS if result['text'] == StatementRenderer(u).render_statement('Real')]) == 1
 
     def test_flex_handler_done_empty_name(self):
         test_server = get_server()
@@ -74,8 +74,7 @@ class TestWeb(object):
         um.get_firstname.return_value = ''
         um.get_username.return_value = 'realuser'
         result = server.flex(user_id='UREALUSER', text='testbot done')
-        assert len(filter(lambda u: result['text'] == StatementRenderer(u).render_statement('realuser'),
-            server.SUCCESS_STATEMENTS)) == 1
+        assert len([u for u in server.SUCCESS_STATEMENTS if result['text'] == StatementRenderer(u).render_statement('realuser')]) == 1
 
     def test_flex_handler_done_with_bang(self):
         test_server = get_server()
@@ -85,8 +84,7 @@ class TestWeb(object):
         ack_handler.acknowledge_winner.return_value = Constants.ACKNOWLEDGE_SUCCEEDED
         um.get_firstname.return_value = 'Real'
         result = server.flex(user_id='UREALUSER', text='testbot done!')
-        assert len(filter(lambda u: result['text'] == StatementRenderer(u).render_statement('Real'),
-            server.SUCCESS_STATEMENTS)) == 1
+        assert len([u for u in server.SUCCESS_STATEMENTS if result['text'] == StatementRenderer(u).render_statement('Real')]) == 1
 
     def test_flex_handler_done_failure(self):
         test_server = get_server()
@@ -96,8 +94,7 @@ class TestWeb(object):
         um.get_firstname.return_value = 'Fake'
         ack_handler.acknowledge_winner.return_value = Constants.ACKNOWLEDGE_FAILED
         result = server.flex(user_id='UFAKEUSER', text='testbot done')
-        assert len(filter(lambda u: result['text'] == StatementRenderer(u).render_statement('Fake'),
-            server.FAILURE_STATEMENTS)) == 1
+        assert len([u for u in server.FAILURE_STATEMENTS if result['text'] == StatementRenderer(u).render_statement('Fake')]) == 1
 
     def test_flex_handler_done_disabled(self):
         test_server = get_server(enable_acknowledgment=False)
