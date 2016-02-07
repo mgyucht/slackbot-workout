@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from flexbot.exercise import Exercise
 from flexbot.loggers import PostgresDatabaseLogger, PostgresConnector
 
