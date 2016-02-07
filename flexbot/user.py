@@ -14,7 +14,7 @@ class User(object):
         return self.get_user_handle()
 
     def get_user_handle(self):
-        return ("@" + self.username).encode('utf-8')
+        return "@" + self.username
 
     def get_mention(self):
         return "<" + self.get_user_handle() + ">"
