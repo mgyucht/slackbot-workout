@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from builtins import object
 def from_dict(d):
     return Exercise(d['name'], d['min_reps'], d['max_reps'], d['units'], d['info'])
 

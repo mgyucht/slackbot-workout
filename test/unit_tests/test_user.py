@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from builtins import object
 from flexbot.user import User
 
 class TestUser(object):

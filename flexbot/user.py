@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from builtins import object
 class User(object):
     def __init__(self, user_id, username, firstname, lastname):
         # The Slack ID of the user
@@ -12,7 +14,7 @@ class User(object):
         return self.get_user_handle()
 
     def get_user_handle(self):
-        return ("@" + self.username).encode('utf-8')
+        return "@" + self.username
 
     def get_mention(self):
         return "<" + self.get_user_handle() + ">"

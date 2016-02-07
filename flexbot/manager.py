@@ -1,9 +1,13 @@
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from builtins import str
+from builtins import object
 import json
 import logging
 
-from constants import Constants
-from user import User
-from util import NoEligibleUsersException
+from .constants import Constants
+from .user import User
+from .util import NoEligibleUsersException
 
 class UserManager(object):
     def __init__(self, api, configuration, workout_logger):
@@ -28,7 +32,7 @@ class UserManager(object):
         s += headerline
         s += "-" * len(headerline) + "\n"
 
-        user_ids = user_id_list if len(user_id_list) > 0 else self.users.keys()
+        user_ids = user_id_list if len(user_id_list) > 0 else list(self.users.keys())
         for user_id in user_ids:
             s += self.get_username(user_id).ljust(15)
             for exercise in exercises:
@@ -142,7 +146,7 @@ class UserManager(object):
         """
         active_users = self.fetch_active_users()
 
-        winner_ids = self.get_current_winners().keys()
+        winner_ids = list(self.get_current_winners().keys())
         eligible_users = []
         for user_id in active_users:
             total_exercises = self.total_exercises_for_user(user_id)
@@ -165,7 +169,7 @@ class UserManager(object):
     def exercise_count_for_user(self, user_id, exercise):
         exercises = self.workout_logger.get_todays_exercises()
         try:
-            filtered_exercises = filter(lambda e: e['exercise'] == exercise.name, exercises[user_id])
+            filtered_exercises = [e for e in exercises[user_id] if e['exercise'] == exercise.name]
             return len(filtered_exercises)
         except KeyError:
             return 0

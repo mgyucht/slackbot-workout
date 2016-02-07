@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from builtins import object
 from nose.tools import assert_raises
 
 from flexbot.configurators import InMemoryConfigurationProvider

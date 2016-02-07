@@ -1,5 +1,8 @@
-from constants import Constants
-import loggers
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from builtins import object
+from .constants import Constants
+from . import loggers
 
 class LoggerFactory(object):
     def __init__(self, configuration):

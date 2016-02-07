@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from builtins import object
 import time
 
 def sleep(minutes=0, seconds=0):

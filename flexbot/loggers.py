@@ -1,13 +1,15 @@
+from __future__ import unicode_literals
+from builtins import str
+from builtins import object
 from abc import ABCMeta, abstractmethod
 import csv
 import datetime
 import logging
 import psycopg2
 import time
+from future.utils import with_metaclass
 
-class BaseLogger(object):
-    __metaclass__ = ABCMeta
-
+class BaseLogger(with_metaclass(ABCMeta, object)):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
@@ -55,7 +57,7 @@ class InMemoryLogger(BaseLogger):
         self.exercises.append((user_id, exercise, reps, datetime.datetime.now()))
 
     def get_todays_exercises(self):
-        return filter(lambda log: log[3].date() == datetime.date.today(), self.exercises)
+        return [log for log in self.exercises if log[3].date() == datetime.date.today()]
 
     def get_current_winners(self):
         return self.winners
