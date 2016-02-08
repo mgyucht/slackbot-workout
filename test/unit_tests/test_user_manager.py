@@ -13,15 +13,18 @@ def get_sample_exercises():
         Exercise('situps', 30, 40, 'reps', '')
     ]
 
-def get_sample_config(enable_acknowledgment):
-    return InMemoryConfigurationProvider({
-        "enable_acknowledgment": enable_acknowledgment
-    }, exercises=get_sample_exercises())
+def get_sample_config(config):
+    return InMemoryConfigurationProvider(config, exercises=get_sample_exercises())
 
-def make_user_manager(enable_acknowledgment=True):
+def make_user_manager(updates={}):
+    config = {
+        "enable_acknowledgment": True,
+        "aggregate_exercises": False
+    }
+    config.update(updates)
     mock_api = get_mock_api()
     logger = mock.Mock(spec=BaseLogger)
-    um = UserManager(mock_api, get_sample_config(enable_acknowledgment), logger)
+    um = UserManager(mock_api, get_sample_config(config), logger)
     return {
         'user_manager': um,
         'logger': logger
@@ -56,7 +59,7 @@ def get_mock_api():
         else:
             return None
     def is_active(user_id):
-        if user_id == 'uid1':
+        if user_id == 'uid1' or user_id == 'uid2':
             return True
         else:
             return False
@@ -83,8 +86,9 @@ class TestUserManager(object):
         um_and_mocks = make_user_manager()
         um = um_and_mocks['user_manager']
         active_users = um.fetch_active_users()
-        assert len(active_users) == 1
-        assert active_users[0] == 'uid1'
+        assert len(active_users) == 2
+        assert 'uid1' in active_users
+        assert 'uid2' in active_users
 
     def test_clear_users(self):
         um_and_mocks = make_user_manager()
@@ -126,10 +130,63 @@ class TestUserManager(object):
                 'reps': 30
             }]
         }
-        logger.get_current_winners.return_value = {}
+        logger.get_current_winners.return_value = {
+            'uid1': [{
+                'exercise': 'pushups',
+                'reps': 30
+            }]
+        }
         eligible_users = um.get_eligible_users()
         assert len(eligible_users) == 1
-        assert eligible_users[0] == 'uid1'
+        assert eligible_users[0] == 'uid2'
+
+    def test_get_eligible_users_aggregate_exercises(self):
+        um_and_mocks = make_user_manager({"aggregate_exercises": True})
+        um = um_and_mocks['user_manager']
+        logger = um_and_mocks['logger']
+        logger.get_todays_exercises.return_value = {
+            'uid1': [{
+                'exercise': 'pushups',
+                'reps': 30
+            }]
+        }
+        logger.get_current_winners.return_value = {
+            'uid1': [{
+                'exercise': 'pushups',
+                'reps': 30
+            }]
+        }
+        eligible_users = um.get_eligible_users()
+        assert len(eligible_users) == 2
+        assert 'uid1' in eligible_users
+        assert 'uid2' in eligible_users
+
+    def test_get_eligible_users_aggregate_exercises_maxed(self):
+        um_and_mocks = make_user_manager({
+            "aggregate_exercises": True,
+            "user_exercise_limit": 2
+        })
+        um = um_and_mocks['user_manager']
+        logger = um_and_mocks['logger']
+        logger.get_todays_exercises.return_value = {
+            'uid1': [{
+                'exercise': 'pushups',
+                'reps': 30
+            }, {
+                'exercise': 'pushups',
+                'reps': 30
+            }]
+        }
+        logger.get_current_winners.return_value = {
+            'uid1': [{
+                'exercise': 'pushups',
+                'reps': 30
+            }]
+        }
+        eligible_users = um.get_eligible_users()
+        assert len(eligible_users) == 1
+        assert 'uid1' not in eligible_users
+        assert 'uid2' in eligible_users
 
     def test_acknowledge_winner_failure(self):
         um_and_mocks = make_user_manager()
@@ -166,7 +223,7 @@ class TestUserManager(object):
         logger.log_exercise.assert_not_called()
 
     def test_mark_winner_ack_disabled(self):
-        um_and_mocks = make_user_manager(enable_acknowledgment=False)
+        um_and_mocks = make_user_manager({"enable_acknowledgment": False})
         um = um_and_mocks['user_manager']
         logger = um_and_mocks['logger']
         exercise = get_sample_exercises()[0]
@@ -175,7 +232,7 @@ class TestUserManager(object):
         logger.log_exercise.assert_called_once_with('uid1', exercise, 30)
 
     def test_add_exercise_for_user(self):
-        um_and_mocks = make_user_manager(enable_acknowledgment=False)
+        um_and_mocks = make_user_manager({"enable_acknowledgment": False})
         um = um_and_mocks['user_manager']
         logger = um_and_mocks['logger']
         exercise = get_sample_exercises()[0]
@@ -183,7 +240,7 @@ class TestUserManager(object):
         logger.log_exercise.assert_called_once_with('uid1', exercise, 30)
 
     def test_total_exercises_for_user(self):
-        um_and_mocks = make_user_manager(enable_acknowledgment=False)
+        um_and_mocks = make_user_manager({"enable_acknowledgment": False})
         um = um_and_mocks['user_manager']
         logger = um_and_mocks['logger']
         logger.get_todays_exercises.return_value = {
@@ -196,7 +253,7 @@ class TestUserManager(object):
         assert um.total_exercises_for_user('uid3') == 0
 
     def test_exercise_count_for_user(self):
-        um_and_mocks = make_user_manager(enable_acknowledgment=False)
+        um_and_mocks = make_user_manager({"enable_acknowledgment": False})
         um = um_and_mocks['user_manager']
         logger = um_and_mocks['logger']
         logger.get_todays_exercises.return_value = {
@@ -211,7 +268,7 @@ class TestUserManager(object):
         assert um.exercise_count_for_user('uid3', sample_exercises[0]) == 0
 
     def test_user_has_done_exercise(self):
-        um_and_mocks = make_user_manager(enable_acknowledgment=False)
+        um_and_mocks = make_user_manager({"enable_acknowledgment": False})
         um = um_and_mocks['user_manager']
         logger = um_and_mocks['logger']
         logger.get_todays_exercises.return_value = {

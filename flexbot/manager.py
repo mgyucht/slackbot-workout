@@ -146,9 +146,12 @@ class UserManager(object):
         eligible_users = []
         for user_id in active_users:
             total_exercises = self.total_exercises_for_user(user_id)
-            if user_id not in winner_ids and total_exercises < self.configuration.user_exercise_limit():
-                self.logger.info("Adding %s to eligible_users list", self.get_username(user_id))
-                eligible_users.append(user_id)
+            if total_exercises < self.configuration.user_exercise_limit():
+                # If the user has not completed all exercises for the day, we add them if the
+                # aggregate_exercises flag is set, or if they haven't yet been assigned an exercise.
+                if user_id not in winner_ids or self.configuration.aggregate_exercises():
+                    self.logger.info("Adding %s to eligible_users list", self.get_username(user_id))
+                    eligible_users.append(user_id)
 
         if len(eligible_users) == 0:
             raise NoEligibleUsersException()
@@ -156,11 +159,11 @@ class UserManager(object):
         return eligible_users
 
     def total_exercises_for_user(self, user_id):
-        exercises = self.workout_logger.get_todays_exercises()
-        try:
-            return len(exercises[user_id])
-        except KeyError:
-            return 0
+        exercise_count = len(self.workout_logger.get_todays_exercises().get(user_id, []))
+        if self.configuration.aggregate_exercises():
+            assigned_exercises = self.workout_logger.get_current_winners().get(user_id, [])
+            exercise_count += len(assigned_exercises)
+        return exercise_count
 
     def exercise_count_for_user(self, user_id, exercise):
         exercises = self.workout_logger.get_todays_exercises()

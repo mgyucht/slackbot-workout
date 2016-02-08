@@ -76,7 +76,7 @@ class Bot(object):
                     * (1 - self.config.group_callout_chance()))
         self.logger.debug("avg_people_per_callout: %d", avg_people_per_callout)
 
-        avg_minutes_per_exercise = time_left.seconds / float(remaining_exercises *
+        avg_minutes_per_exercise = time_left.seconds / (remaining_exercises *
                 avg_people_per_callout * 60)
         self.logger.debug("avg_minutes_per_exercise: %d", avg_minutes_per_exercise)
 

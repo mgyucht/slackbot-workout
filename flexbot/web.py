@@ -79,8 +79,8 @@ Welcome to {{channel_name}}! I am {{bot_name}}, your friendly helpful workout bo
 - `{{bot_name}} stats [user1 [user2 [...]]]`: print the stats for user1, user2, ... If no user is provided, prints the stats for the requesting user
 - `{{bot_name}} stats channel`: print the stats for everyone in the channel
 {{#enable_acknowledgment}}
-- `{{bot_name}} done`: indicate that you have indeed finished your exercise for the current round
-- `{{bot_name}} todo`: show users who have a pending exercise and the exercise they must do
+- `{{bot_name}} done`: indicate that you have indeed finished an exercise. If you have been assigned multiple exercises, this marks the oldest exercise assigned to you as complete
+- `{{bot_name}} todo`: show users who have a pending exercise and the exercise they must do, from oldest to newest
 {{/enable_acknowledgment}}
 - `{{bot_name}}, I don't have to listen to you`: doubles your exercise quota permanently (coming soon)
 {{#enable_acknowledgment}}
@@ -166,8 +166,10 @@ A little primer on how I work: after I call you out for an exercise, I will only
             for user_id in current_winners:
                 pending_exercises = current_winners[user_id]
                 exercise_strings = []
-                for exercise, reps in pending_exercises:
-                    exercise_string = "{} {} {}".format(reps, exercise.units, exercise.name)
+                for assignment in pending_exercises:
+                    exercise = self.user_manager.get_exercise_by_name(assignment['exercise'])
+                    exercise_string = "{} {} {}".format(assignment['reps'], exercise.units,
+                            exercise.name)
                     exercise_strings.append(exercise_string)
                 response += self.user_manager.get_username(user_id).ljust(15)
                 response += ", ".join(exercise_strings)
