@@ -16,10 +16,10 @@ EXPOSE 8080
 COPY requirements.txt /flexbot/
 RUN pip3 install -r /flexbot/requirements.txt
 
-COPY flexbot /flexbot/flexbot
-COPY exercises /flexbot/exercises
-COPY samples /flexbot/samples
-
 WORKDIR /flexbot
+
 CMD ["python3", "-m", "samples.run_flexbot", "--config", "configuration/config.yaml", "--logging-config", "configuration/logging.yaml"]
 
+COPY samples /flexbot/samples
+COPY exercises /flexbot/exercises
+COPY flexbot /flexbot/flexbot

@@ -161,7 +161,8 @@ class UserManager(object):
     def total_exercises_for_user(self, user_id):
         exercise_count = len(self.workout_logger.get_todays_exercises().get(user_id, []))
         if self.configuration.aggregate_exercises():
-            exercise_count += len(self.workout_logger.get_current_winners().get(user_id, []))
+            assigned_exercises = self.workout_logger.get_current_winners().get(user_id, [])
+            exercise_count += len(assigned_exercises)
         return exercise_count
 
     def exercise_count_for_user(self, user_id, exercise):

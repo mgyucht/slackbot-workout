@@ -244,8 +244,16 @@ class PostgresDatabaseLogger(BaseLogger, PostgresConnector):
 
     def finish_exercise(self, winner_id):
         def finish_exercise_command(cursor):
+            # TODO(mgyucht): don't use RETURNING * when psycopg2 supports it
             cursor.execute("""
                 DELETE FROM {} WHERE winner_id = %s AND time IN
                     (SELECT time FROM {} WHERE winner_id = %s ORDER BY time ASC LIMIT 1)
+                    RETURNING *
             """.format(self.winners_table, self.winners_table), (winner_id, winner_id))
+            row = cursor.fetchone()
+            if row is not None:
+                return {
+                    "exercise": row[1],
+                    "reps": row[2]
+                }
         return self.with_connection(finish_exercise_command)
