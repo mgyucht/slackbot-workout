@@ -79,7 +79,7 @@ Welcome to {{channel_name}}! I am {{bot_name}}, your friendly helpful workout bo
 - `{{bot_name}} stats [user1 [user2 [...]]]`: print the stats for user1, user2, ... If no user is provided, prints the stats for the requesting user
 - `{{bot_name}} stats channel`: print the stats for everyone in the channel
 {{#enable_acknowledgment}}
-- `{{bot_name}} done`: indicate that you have indeed finished your exercise for the current round
+- `{{bot_name}} done`: indicate that you have indeed finished an exercise. If you have been assigned multiple exercises, this marks the oldest exercise assigned to you as complete
 - `{{bot_name}} todo`: show users who have a pending exercise and the exercise they must do
 {{/enable_acknowledgment}}
 - `{{bot_name}}, I don't have to listen to you`: doubles your exercise quota permanently (coming soon)

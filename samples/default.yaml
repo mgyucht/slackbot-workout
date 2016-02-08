@@ -34,4 +34,5 @@ workout_logger_type: InMemoryLogger
 #  user: username
 #  password: password
 
-aggregate_exercises: Yes
+# Allow a user to be assigned more than one exercise at a time
+aggregate_exercises: No

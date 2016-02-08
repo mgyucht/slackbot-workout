@@ -28,5 +28,5 @@
   "enable_acknowledgment": true,
 
   "workout_logger_type": "InMemoryLogger",
-  "aggregate_exercises": true
+  "aggregate_exercises": false
 }
