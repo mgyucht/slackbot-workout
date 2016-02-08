@@ -104,6 +104,9 @@ class ConfigurationProvider(with_metaclass(ABCMeta, object)):
     def workout_logger_settings(self):
         return self.get_config_or_default(None, ['workout_logger_settings'])
 
+    def aggregate_exercises(self):
+        return self.get_config_or_default(False, ['aggregate_exercises'])
+
 class JsonFileConfigurationProvider(ConfigurationProvider):
     def __init__(self, filename):
         self.filename = filename

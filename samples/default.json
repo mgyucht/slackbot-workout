@@ -27,5 +27,6 @@
   "user_exercise_limit": 3,
   "enable_acknowledgment": true,
 
-  "workout_logger_type": "InMemoryLogger"
+  "workout_logger_type": "InMemoryLogger",
+  "aggregate_exercises": true
 }

@@ -33,3 +33,5 @@ workout_logger_type: InMemoryLogger
 #  port: 5432
 #  user: username
 #  password: password
+
+aggregate_exercises: Yes
