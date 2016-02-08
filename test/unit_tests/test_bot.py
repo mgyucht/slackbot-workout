@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-from builtins import object
 from mock import Mock
 
 from flexbot.api import FlexbotApiClient

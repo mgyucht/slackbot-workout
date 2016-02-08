@@ -1,10 +1,3 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import unicode_literals
-from builtins import str
-from builtins import range
-from builtins import object
-from past.utils import old_div
 import datetime
 import logging
 import random
@@ -59,7 +52,7 @@ class Bot(object):
         # How much time is there left in the day
         time_left = datetime.datetime.now().replace(hour=self.config.office_hours_end(), minute=0,
                 second=0, microsecond=0) - datetime.datetime.now()
-        self.logger.debug("time_left (min): %d", old_div(time_left.seconds, 60))
+        self.logger.debug("time_left (min): %d", time_left.seconds / 60)
 
         # How many exercises remain to be done
         exercise_count = sum([self.user_manager.total_exercises_for_user(u) for u in eligible_users])
@@ -83,8 +76,8 @@ class Bot(object):
                     * (1 - self.config.group_callout_chance()))
         self.logger.debug("avg_people_per_callout: %d", avg_people_per_callout)
 
-        avg_minutes_per_exercise = old_div(time_left.seconds, float(remaining_exercises *
-                avg_people_per_callout * 60))
+        avg_minutes_per_exercise = time_left.seconds / float(remaining_exercises *
+                avg_people_per_callout * 60)
         self.logger.debug("avg_minutes_per_exercise: %d", avg_minutes_per_exercise)
 
         return min(self.config.max_time_between_callouts(),
