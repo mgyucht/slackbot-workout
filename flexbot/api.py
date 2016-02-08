@@ -2,6 +2,8 @@ import logging
 
 from slacker import Slacker
 
+from .user import User
+
 class FlexbotApiClient(Slacker):
     def __init__(self, configuration, **kwargs):
         super(FlexbotApiClient, self).__init__(**kwargs)
