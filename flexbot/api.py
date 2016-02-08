@@ -34,7 +34,11 @@ class FlexbotApiClient(Slacker):
         return response['channel']['members']
 
     def get_user_info(self, user_id):
-        return self.users.info(user_id).body['user']
+        user_json = self.users.info(user_id).body['user']
+        username = user_json['name']
+        firstname = user_json['profile'].get('first_name', '')
+        lastname = user_json['profile'].get('last_name', '')
+        return User(user_id, username, firstname, lastname)
 
     def is_active(self, user_id):
         response =  self.users.get_presence(user_id).body

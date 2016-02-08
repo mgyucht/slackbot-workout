@@ -75,10 +75,6 @@ class Server(object):
 
     def _workout_step(self, was_office_hours, is_office_hours):
         if is_office_hours:
-            # Clear the previous day's history if this is the first workout of the day
-            if not was_office_hours:
-                self.user_manager.clear_users()
-
             # Get an exercise to do
             exercise, reps, mins_to_exercise = self.bot.select_exercise_and_start_time()
             util.sleep(minutes=mins_to_exercise)

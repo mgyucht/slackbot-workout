@@ -11,9 +11,6 @@ class UserManager(object):
         self.configuration = configuration
         self.workout_logger = workout_logger
         self.logger = logging.getLogger(__name__)
-        self.users = {}
-        self.current_winners = {}
-        self.fetch_users()
 
     def stats(self, user_id_list=[]):
         # Write to the command console today's breakdown
@@ -28,7 +25,7 @@ class UserManager(object):
         s += headerline
         s += "-" * len(headerline) + "\n"
 
-        user_ids = user_id_list if len(user_id_list) > 0 else list(self.users.keys())
+        user_ids = user_id_list if len(user_id_list) > 0 else self.api.get_members()
         for user_id in user_ids:
             s += self.get_username(user_id).ljust(15)
             for exercise in exercises:
@@ -47,31 +44,24 @@ class UserManager(object):
         """
         Fetches all users in the channel
         """
-        # Check for new members
-        user_ids = self.api.get_members()
+        users = {}
 
-        for user_id in user_ids:
-            if user_id not in self.users:
-                user_json = self.api.get_user_info(user_id)
-                self.logger.info("Adding user with json: %s", json.dumps(user_json))
-                username = user_json['name']
-                firstname = user_json['profile'].get('first_name', '')
-                lastname = user_json['profile'].get('last_name', '')
-                self.users[user_id] = User(user_id, username, firstname, lastname)
+        for user_id in self.api.get_members():
+            user = self._get_user(user_id)
+            self.logger.debug("Adding user {}".format(user))
+            users[user_id] = user
+        return users
 
     def fetch_active_users(self):
         """
         Returns a list of all active users in the channel
         """
-        self.fetch_users()
+        users = self.fetch_users()
         active_users = []
-        for user_id in self.users:
+        for user_id in users:
             if self.api.is_active(user_id):
                 active_users.append(user_id)
         return active_users
-
-    def clear_users(self):
-        self.users = {}
 
     # --------------------------------------
     # Acknowledgment mode methods
@@ -102,21 +92,24 @@ class UserManager(object):
     # User utility methods
     # --------------------------------------
 
+    def _get_user(self, user_id):
+        return self.api.get_user_info(user_id)
+
     def get_firstname(self, user_id):
         try:
-            return self.users[user_id].firstname
-        except KeyError:
+            return self._get_user(user_id).firstname
+        except:
             return None
 
     def get_username(self, user_id):
         try:
-            return self.users[user_id].username
-        except KeyError:
+            return self._get_user(user_id).username
+        except:
             return None
 
     def get_mention(self, user_id):
         try:
-            return self.users[user_id].get_mention()
+            return self._get_user(user_id).get_mention()
         except:
             return None
 
@@ -161,7 +154,7 @@ class UserManager(object):
     def total_exercises_for_user(self, user_id):
         exercise_count = len(self.workout_logger.get_todays_exercises().get(user_id, []))
         if self.configuration.aggregate_exercises():
-            assigned_exercises = self.workout_logger.get_current_winners().get(user_id, [])
+            assigned_exercises = self.get_current_winners().get(user_id, [])
             exercise_count += len(assigned_exercises)
         return exercise_count
 

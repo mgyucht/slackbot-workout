@@ -112,17 +112,16 @@ A little primer on how I work: after I call you out for an exercise, I will only
         if len(usernames) == 0:
             users_to_print.add(current_user_id)
         else:
-            for user_id in self.user_manager.users:
-                user = self.user_manager.users[user_id]
-                user_reverse_lookup[user.username.lower()] = user_id
+            user_dict = self.user_manager.fetch_users()
+            users = user_dict.values()
             for username in usernames:
                 self.logger.debug("Looking up username %s", username)
                 username = username[1:] if username.startswith("@") else username
-                if username in user_reverse_lookup:
-                    users_to_print.add(user_reverse_lookup[username])
-                elif username == "channel":
-                    users_to_print = list(self.user_manager.users.keys())
+                if username == "channel":
+                    users_to_print = user_dict.keys()
                     break
+                for user in filter(lambda u: u.username == username, users):
+                    users_to_print.add(user)
         if len(users_to_print) > 0:
             stats = self.user_manager.stats(list(users_to_print))
             return {

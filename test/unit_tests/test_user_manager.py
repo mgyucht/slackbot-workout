@@ -5,6 +5,7 @@ from flexbot.configurators import InMemoryConfigurationProvider
 from flexbot.constants import Constants
 from flexbot.exercise import Exercise
 from flexbot.loggers import BaseLogger
+from flexbot.user import User
 from flexbot.manager import UserManager
 
 def get_sample_exercises():
@@ -35,27 +36,11 @@ def get_mock_api():
         return ['uid1', 'uid2', 'uid3']
     def get_user_info(user_id):
         if user_id == 'uid1':
-            return {
-                'name': 'User1',
-                'profile': {
-                    'first_name': 'User',
-                    'last_name': '1'
-                }
-            }
+            return User('uid', 'User1', 'User', '1')
         elif user_id == 'uid2':
-            return {
-                'name': 'User2',
-                'profile': {
-                    'first_name': 'User',
-                    'last_name': '2'
-                }
-            }
+            return User('uid2', 'User2', 'User', '2')
         elif user_id == 'uid3':
-            return {
-                'name': 'User3',
-                'profile': {
-                }
-            }
+            return User('uid3', 'User3', '', '')
         else:
             return None
     def is_active(user_id):
@@ -75,12 +60,12 @@ class TestUserManager(object):
     def test_fetch_users(self):
         um_and_mocks = make_user_manager()
         um = um_and_mocks['user_manager']
-        um.fetch_users()
-        assert 'uid1' in um.users
-        assert 'uid2' in um.users
-        assert 'uid3' in um.users
-        assert um.users['uid3'].firstname == ''
-        assert um.users['uid3'].lastname == ''
+        users = um.fetch_users()
+        assert 'uid1' in users
+        assert 'uid2' in users
+        assert 'uid3' in users
+        assert users['uid3'].firstname == ''
+        assert users['uid3'].lastname == ''
 
     def test_fetch_active_users(self):
         um_and_mocks = make_user_manager()
@@ -90,26 +75,15 @@ class TestUserManager(object):
         assert 'uid1' in active_users
         assert 'uid2' in active_users
 
-    def test_clear_users(self):
-        um_and_mocks = make_user_manager()
-        um = um_and_mocks['user_manager']
-        um.fetch_users()
-        assert 'uid1' in um.users
-        assert 'uid2' in um.users
-        um.clear_users()
-        assert len(um.users) == 0
-
     def test_get_firstname(self):
         um_and_mocks = make_user_manager()
         um = um_and_mocks['user_manager']
-        um.fetch_users()
         assert um.get_firstname('uid1') == 'User'
         assert um.get_firstname('uid0') == None
 
     def test_get_username(self):
         um_and_mocks = make_user_manager()
         um = um_and_mocks['user_manager']
-        um.fetch_users()
         assert um.get_username('uid1') == 'User1'
         assert um.get_username('uid0') == None
 

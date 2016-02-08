@@ -53,7 +53,6 @@ class TestServer(object):
 
         server._workout_step(False, True)
 
-        um.clear_users.assert_called_once_with()
         bot.select_exercise_and_start_time.assert_called_once_with()
         mock_time.sleep.assert_called_once_with(300)
 

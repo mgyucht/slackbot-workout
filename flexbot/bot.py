@@ -90,7 +90,8 @@ class Bot(object):
         Selects a set of users or the channel to do the already-selected exercise, and returns the
         list of winners.
         """
-        winner_announcement = "{} {} {} RIGHT NOW".format(exercise_reps, exercise.units, exercise.name)
+        winner_announcement = "{} {} {} RIGHT NOW ".format(exercise_reps, exercise.units,
+                exercise.name)
 
         eligible_users = self.user_manager.get_eligible_users()
         winners = []
