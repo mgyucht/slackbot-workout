@@ -1,5 +1,5 @@
-from constants import Constants
-import loggers
+from .constants import Constants
+from . import loggers
 
 class LoggerFactory(object):
     def __init__(self, configuration):

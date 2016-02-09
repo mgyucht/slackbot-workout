@@ -58,7 +58,7 @@ class TestBot(object):
         bot = bot_and_mocks['bot']
         um = bot_and_mocks['user_manager']
         um.total_exercises_for_user.return_value = 0
-        users = map(lambda u: u.id, active_users())
+        users = [u.id for u in active_users()]
         interval = bot.select_next_time_interval(users)
         assert isinstance(interval, int) or (isinstance(interval, float) and interval.is_integer())
 
@@ -71,9 +71,9 @@ class TestBot(object):
         bot = bot_and_mocks['bot']
         um = bot_and_mocks['user_manager']
         um.total_exercises_for_user.return_value = 0
-        users = map(lambda u: u.id, active_users())
+        users = [u.id for u in active_users()]
         exercise, reps, mins_to_exercise = bot._select_exercise_and_start_time(users)
-        assert exercise.name in map(lambda e: e.name, exercises)
+        assert exercise.name in [e.name for e in exercises]
         assert min_time <= mins_to_exercise <= max_time
 
     def test_assign_exercise_with_ack(self):
@@ -81,7 +81,7 @@ class TestBot(object):
         bot = bot_and_mocks['bot']
         um = bot_and_mocks['user_manager']
         users = active_users()
-        um.get_eligible_users.return_value = map(lambda u: u.id, users)
+        um.get_eligible_users.return_value = [u.id for u in users]
         um.user_has_done_exercise.return_value = False
         um.total_exercises_for_user.return_value = 0
 
@@ -97,10 +97,10 @@ class TestBot(object):
             exercise_list.append((user_id, exercise_count))
             return u
         ulist = [make_mock_user(uid, exercises) for (uid, exercises) in [('uid1', 2), ('uid2', 1)]]
-        uidlist = map(lambda u: u.id, ulist)
+        uidlist = [u.id for u in ulist]
         def total_exercises(user_id):
             try:
-                filtered = filter(lambda u: u[0] == user_id, exercise_list)
+                filtered = [u for u in exercise_list if u[0] == user_id]
                 return filtered[0][1]
             except:
                 return 0
@@ -109,5 +109,5 @@ class TestBot(object):
         um = bot_and_mocks['user_manager']
         um.total_exercises_for_user = total_exercises
         lottery_list = bot.get_lottery_list(uidlist)
-        assert len(filter(lambda u: u == 'uid1', lottery_list)) == 1
-        assert len(filter(lambda u: u == 'uid2', lottery_list)) == 2
+        assert len([u for u in lottery_list if u == 'uid1']) == 1
+        assert len([u for u in lottery_list if u == 'uid2']) == 2

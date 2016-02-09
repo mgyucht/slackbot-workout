@@ -3,13 +3,12 @@ import json
 import os
 import yaml
 
-from constants import Constants
-from exercise import from_dict
-from util import InvalidLoggerTypeException
+from .constants import Constants
+from .exercise import from_dict
+from .util import InvalidLoggerTypeException
+from future.utils import with_metaclass
 
-class ConfigurationProvider(object):
-    __metaclass__ = ABCMeta
-
+class ConfigurationProvider(with_metaclass(ABCMeta, object)):
     @abstractmethod
     def load_configuration(self):
         pass
@@ -104,6 +103,9 @@ class ConfigurationProvider(object):
 
     def workout_logger_settings(self):
         return self.get_config_or_default(None, ['workout_logger_settings'])
+
+    def aggregate_exercises(self):
+        return self.get_config_or_default(False, ['aggregate_exercises'])
 
 class JsonFileConfigurationProvider(ConfigurationProvider):
     def __init__(self, filename):

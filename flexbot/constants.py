@@ -1,4 +1,4 @@
-import loggers
+from . import loggers
 
 class Constants(object):
     ACKNOWLEDGE_SUCCEEDED = 0

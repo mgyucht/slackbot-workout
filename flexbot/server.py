@@ -2,12 +2,12 @@ import cherrypy
 import logging
 import threading
 
-from api import FlexbotApiClient
-from bot import Bot, NoEligibleUsersException
-from logger_factory import LoggerFactory
-from manager import UserManager
-import util
-from web import FlexbotWebServer
+from .api import FlexbotApiClient
+from .bot import Bot, NoEligibleUsersException
+from .logger_factory import LoggerFactory
+from .manager import UserManager
+from . import util
+from .web import FlexbotWebServer
 
 class Server(object):
     def __init__(self, configuration, workout_logger=None, **kwargs):

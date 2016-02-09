@@ -32,7 +32,7 @@ A fun hack that gets Slackbot to force your teammates to work out!
     ```
     $ sudo ./install-dependencies.sh
     $ sudo pip install -r requirements.txt
-    $ python -m samples.flexbot
+    $ python -m samples.run_flexbot
     ```
 
     Run the script to start the workouts and hit ctrl+\ to stop the script. Hope you have fun with it!

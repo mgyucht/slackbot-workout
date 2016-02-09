@@ -4,10 +4,9 @@ import datetime
 import logging
 import psycopg2
 import time
+from future.utils import with_metaclass
 
-class BaseLogger(object):
-    __metaclass__ = ABCMeta
-
+class BaseLogger(with_metaclass(ABCMeta, object)):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
@@ -55,7 +54,7 @@ class InMemoryLogger(BaseLogger):
         self.exercises.append((user_id, exercise, reps, datetime.datetime.now()))
 
     def get_todays_exercises(self):
-        return filter(lambda log: log[3].date() == datetime.date.today(), self.exercises)
+        return [log for log in self.exercises if log[3].date() == datetime.date.today()]
 
     def get_current_winners(self):
         return self.winners
@@ -245,21 +244,16 @@ class PostgresDatabaseLogger(BaseLogger, PostgresConnector):
 
     def finish_exercise(self, winner_id):
         def finish_exercise_command(cursor):
-            # Get the current exercise for the user
-            cursor.execute("""
-                SELECT exercise, reps FROM {} WHERE winner_id = %s ORDER BY time ASC LIMIT 1
-            """.format(self.winners_table), (winner_id,))
-            if cursor.rowcount == 0:
-                return None
-
-            row = cursor.fetchone()
-            exercise_data = {
-                'exercise': row[0],
-                'reps': row[1]
-            }
+            # TODO(mgyucht): don't use RETURNING * when psycopg2 supports it
             cursor.execute("""
                 DELETE FROM {} WHERE winner_id = %s AND time IN
                     (SELECT time FROM {} WHERE winner_id = %s ORDER BY time ASC LIMIT 1)
+                    RETURNING *
             """.format(self.winners_table, self.winners_table), (winner_id, winner_id))
-            return exercise_data
+            row = cursor.fetchone()
+            if row is not None:
+                return {
+                    "exercise": row[1],
+                    "reps": row[2]
+                }
         return self.with_connection(finish_exercise_command)
