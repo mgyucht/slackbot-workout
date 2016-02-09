@@ -110,15 +110,14 @@ A little primer on how I work: after I call you out for an exercise, I will only
         user_reverse_lookup = {}
         users_to_print = set()
         if len(usernames) == 0:
-            users_to_print.add(current_user_id)
+            users_to_print.add(self.user_manager.get_user(user_id))
         else:
-            user_dict = self.user_manager.fetch_users()
-            users = user_dict.values()
+            user_dict = self.user_manager.fetch_users().values()
             for username in usernames:
                 self.logger.debug("Looking up username %s", username)
                 username = username[1:] if username.startswith("@") else username
                 if username == "channel":
-                    users_to_print = user_dict.keys()
+                    users_to_print = users
                     break
                 for user in filter(lambda u: u.username == username, users):
                     users_to_print.add(user)

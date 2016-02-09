@@ -12,7 +12,7 @@ class UserManager(object):
         self.workout_logger = workout_logger
         self.logger = logging.getLogger(__name__)
 
-    def stats(self, user_id_list=[]):
+    def stats(self, user_list=[]):
         # Write to the command console today's breakdown
         s = "Today's stats:\n"
         s += "```\n"
@@ -21,16 +21,18 @@ class UserManager(object):
         exercises = self.configuration.exercises()
         for exercise in exercises:
             headerline += exercise.name + "  "
+        headerline += "Todo  "
         headerline += "Total\n"
         s += headerline
         s += "-" * len(headerline) + "\n"
 
-        user_ids = user_id_list if len(user_id_list) > 0 else self.api.get_members()
-        for user_id in user_ids:
-            s += self.get_username(user_id).ljust(15)
+        users = user_list if len(user_list) > 0 else self.fetch_users().values()
+        for user in users:
+            s += user.username.ljust(15)
             for exercise in exercises:
-                s += str(self.exercise_count_for_user(user_id, exercise)).ljust(len(exercise.name) + 2)
-            s += str(self.total_exercises_for_user(user_id))
+                s += str(self.exercise_count_for_user(user.user_id, exercise)).ljust(len(exercise.name) + 2)
+            s += str(self.pending_exercises_for_user(user.user_id)).ljust(6)
+            s += str(self.total_exercises_for_user(user.user_id))
             s += "\n"
 
         s += "```"
@@ -47,7 +49,7 @@ class UserManager(object):
         users = {}
 
         for user_id in self.api.get_members():
-            user = self._get_user(user_id)
+            user = self.get_user(user_id)
             self.logger.debug("Adding user {}".format(user))
             users[user_id] = user
         return users
@@ -92,24 +94,24 @@ class UserManager(object):
     # User utility methods
     # --------------------------------------
 
-    def _get_user(self, user_id):
+    def get_user(self, user_id):
         return self.api.get_user_info(user_id)
 
     def get_firstname(self, user_id):
         try:
-            return self._get_user(user_id).firstname
+            return self.get_user(user_id).firstname
         except:
             return None
 
     def get_username(self, user_id):
         try:
-            return self._get_user(user_id).username
+            return self.get_user(user_id).username
         except:
             return None
 
     def get_mention(self, user_id):
         try:
-            return self._get_user(user_id).get_mention()
+            return self.get_user(user_id).get_mention()
         except:
             return None
 
@@ -139,6 +141,8 @@ class UserManager(object):
         eligible_users = []
         for user_id in active_users:
             total_exercises = self.total_exercises_for_user(user_id)
+            if self.configuration.aggregate_exercises():
+                total_exercises += self.pending_exercises_for_user(user_id)
             if total_exercises < self.configuration.user_exercise_limit():
                 # If the user has not completed all exercises for the day, we add them if the
                 # aggregate_exercises flag is set, or if they haven't yet been assigned an exercise.
@@ -152,11 +156,10 @@ class UserManager(object):
         return eligible_users
 
     def total_exercises_for_user(self, user_id):
-        exercise_count = len(self.workout_logger.get_todays_exercises().get(user_id, []))
-        if self.configuration.aggregate_exercises():
-            assigned_exercises = self.get_current_winners().get(user_id, [])
-            exercise_count += len(assigned_exercises)
-        return exercise_count
+        return len(self.workout_logger.get_todays_exercises().get(user_id, []))
+
+    def pending_exercises_for_user(self, user_id):
+        return len(self.get_current_winners().get(user_id, []))
 
     def exercise_count_for_user(self, user_id, exercise):
         exercises = self.workout_logger.get_todays_exercises()
