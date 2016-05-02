@@ -30,4 +30,3 @@ class InvalidLoggerTypeException(Exception):
 class NoEligibleUsersException(Exception):
     def __str__(self):
         return "No available users at this time"
-

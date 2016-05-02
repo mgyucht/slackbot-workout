@@ -107,32 +107,42 @@ class ConfigurationProvider(with_metaclass(ABCMeta, object)):
     def aggregate_exercises(self):
         return self.get_config_or_default(False, ['aggregate_exercises'])
 
-class JsonFileConfigurationProvider(ConfigurationProvider):
-    def __init__(self, filename):
-        self.filename = filename
+class GenericConfigurationProvider(ConfigurationProvider):
+    def __init__(self, config_name, config_type, config_source):
+        assert config_type in Constants.CONFIGURATIONS, \
+               "config_type must be either yaml or json"
+        assert config_source in Constants.CONFIGURATION_SOURCES, \
+               "config_source must be env, file, or in_memory"
+        self.config_name = config_name
+        self.config_type = config_type
+        self.config_source = config_source
         self.set_configuration()
 
-    def load_file(self, filename):
-        with open(filename, 'r') as f:
-            return json.load(f)
-
     def load_configuration(self):
-        return self.load_file(self.filename)
+        if self.config_source == Constants.CONFIGURATION_SOURCE_FILE:
+            with open(self.config_name, "r") as f:
+                raw_config = f.read()
+        elif self.config_source == Constants.CONFIGURATION_SOURCE_ENV:
+            raw_config = os.environ[self.config_name]
+        return self.add_creds(self.cook_config(raw_config))
 
-    def load_exercise(self, filename):
-        return from_dict(self.load_file(filename))
+    def add_creds(self, cooked_config):
+        SECRET_PATH = "/flexbot/secrets"
+        with open(SECRET_PATH + "/username", "r") as f:
+            cooked_config["workout_logger_settings"]["user"] = f.read()
+        with open(SECRET_PATH + "/password", "r") as f:
+            cooked_config["workout_logger_settings"]["password"] = f.read()
+        return cooked_config
 
-class YamlFileConfigurationProvider(ConfigurationProvider):
-    def __init__(self, filename):
-        self.filename = filename
-        self.set_configuration()
+    def cook_config(self, raw_config):
+        if self.config_type == Constants.CONFIGURATION_YAML:
+            return yaml.load(raw_config)
+        elif self.config_type == Constants.CONFIGURATION_JSON:
+            return json.loads(raw_config)
 
     def load_file(self, filename):
-        with open(filename, 'r') as f:
-            return yaml.load(f)
-
-    def load_configuration(self):
-        return self.load_file(self.filename)
+        with open(filename, "r") as f:
+            return self.cook_config(f.read())
 
     def load_exercise(self, filename):
         return from_dict(self.load_file(filename))
