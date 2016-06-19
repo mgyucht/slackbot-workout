@@ -1,0 +1,95 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: slackbot-workout
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: slackbot-workout
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: slackbot-workout
+    spec:
+      containers:
+      - name: slackbot-workout
+        command:
+        - python3
+        args:
+        - "-m"
+        - samples.run_flexbot
+        - "--config"
+        - env:SLACKBOT_CONF_YAML
+        - "--logging-config"
+        - env:SLACKBOT_LOGGING_CONF_YAML
+        image: yucht/flexbot@sha256:7005c5ccb108116d5da3e198c2373264882312f9ec6e2b99eb9972e49a17efb4
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        volumeMounts:
+        - name: secrets
+          mountPath: /flexbot/secrets
+          readOnly: true
+        env:
+        - name: SLACKBOT_CONF_YAML
+          value: |
+            channel_name: flexecution
+            bot_name: Flexbot
+            slack_token: xoxp-2499669547-10707224704-15892141524-4b7e5a03b7
+            webserver_port: 80
+
+            office_hours:
+            "on": Yes
+            begin: 9
+            end: 18
+
+            debug: No
+
+            callouts:
+            time_between:
+              min_time: 15
+              max_time: 100
+            num_people: 1
+            group_callout_chance: 0.05
+
+            exercise_directory: exercises
+
+            user_exercise_limit: 3
+            enable_acknowledgment: Yes
+            workout_logger_type: PostgresDatabaseLogger
+            workout_logger_settings:
+              tablename: flexecution
+              winners_table: winners
+              dbname: flexecution
+              host: flexecution-kubernetes.chlee7xx28jo.us-west-2.rds.amazonaws.com
+              port: 5432
+
+            aggregate_exercises: Yes
+        - name: SLACKBOT_LOGGING_CONF_YAML
+          value: |
+            version: 1
+
+            formatters:
+              simple:
+                format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
+            handlers:
+              console:
+                class: logging.StreamHandler
+                level: NOTSET
+                formatter: simple
+                stream: ext://sys.stdout
+
+            root:
+              level: NOTSET
+              handlers: [console]
+      volumes:
+      - name: secrets
+        secret:
+          secretName: flexbot-secrets
